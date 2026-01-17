@@ -428,7 +428,12 @@
                     </div>
                     <div class="form-group">
                         <label for="signup-phone">Phone Number</label>
-                        <input type="tel" id="signup-phone" oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Enter your phone number" required>
+                        <input type="tel" id="signup-phone" value="+91" oninput="
+    if(!this.value.startsWith('+91 ')) this.value = '+91 ';
+    let num = this.value.replace('+91 ', '').replace(/[^0-9]/g,'');
+    if(num.length > 0 && !/^[6-9]/.test(num)) num = '';
+    this.value = '+91 ' + num.slice(0,10);
+  " placeholder="Enter your phone number" required>
                     </div>
                     <div class="form-group">
                         <label for="signup-password">Password</label>
@@ -446,3 +451,4 @@
 
 
 </html>
+
