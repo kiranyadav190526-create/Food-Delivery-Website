@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub Logic Presentation</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --accent-color: #FF6B6B;
+            --secondary-accent: #4ecdc4;
+            --code-bg: #2d2d2d;
+            --slide-width: 900px;
+            --slide-height: 600px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: var(--slide-width);
+            height: var(--slide-height);
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        /* Slide Styling */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.5s ease-in-out;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100px);
+            opacity: 0;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--secondary-accent);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--secondary-accent);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p,
+        li {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        ul li::before {
+            content: "•";
+            color: var(--accent-color);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        .concept-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-left: 4px solid var(--secondary-accent);
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Code Snippets */
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #444;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #a5d6a7;
+            font-size: 1rem;
+        }
+
+        .keyword {
+            color: #ff79c6;
+        }
+
+        .string {
+            color: #f1fa8c;
+        }
+
+        .comment {
+            color: #6272a4;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 25px;
+            left: 30px;
+            font-size: 0.9rem;
+            opacity: 0.5;
+        }
+
+        /* Title Slide Specifics */
+        .title-slide {
+            text-align: center;
+            align-items: center;
+        }
+
+        .title-slide h1 {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+        }
+
+        .title-slide h2 {
+            font-size: 2rem;
+            color: var(--text-color);
+            border: none;
+            font-weight: 300;
+        }
+
+        /* PRINT / PDF STYLING */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            body {
+                background-color: #1a1a1a;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                height: auto;
+                overflow: visible;
+                display: block;
+            }
+
+            .presentation-container {
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+                overflow: visible;
+                border-radius: 0;
+            }
+
+            .slide {
+                position: relative;
+                /* Stack them naturally */
+                opacity: 1 !important;
+                transform: none !important;
+                page-break-after: always;
+                /* Force new page per slide */
+                height: 100vh;
+                display: flex;
+                left: auto;
+                top: auto;
+                border-bottom: 1px solid #333;
+            }
+
+            .controls,
+            .progress-bar,
+            .slide-number {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="presentation-container">
+
+        <!-- Slide 1: Group Intro -->
+        <div class="slide active title-slide">
+            <h1 style="color: var(--secondary-accent); font-size: 4rem;">Quantum Coders</h1>
+            <h2>FoodHub Project Presentation</h2>
+
+            <div
+                style="margin-top: 50px; background: rgba(255,255,255,0.05); padding: 30px 50px; border-radius: 15px; border: 1px solid #333;">
+                <h3 style="color: var(--accent-color); margin-top: 0; margin-bottom: 20px;">Presented By:</h3>
+                <ul style="font-size: 1.5rem; padding: 0; text-align: left; display: inline-block;">
+                    <li style="margin-bottom: 10px; color: #fff;">👩‍💻 Devanshi</li>
+                    <li style="margin-bottom: 10px; color: #fff;">👩‍💻 Kiran</li>
+                    <li style="margin-bottom: 10px; color: #fff;">👩‍💻 Saloni</li>
+                    <li style="margin-bottom: 10px; color: #fff;">👩‍💻 Sneha</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 2: Overview -->
+        <div class="slide title-slide">
+            <h1>FoodHub Logic</h1>
+            <h2>The Logic Behind the UI</h2>
+            <div style="margin-top: 40px; text-align: left; display: inline-block;">
+                <p><strong>Goal:</strong> Making the website dynamic and interactive.</p>
+                <h3>What this script does:</h3>
+                <ul>
+                    <li>Loads restaurant data.</li>
+                    <li>Handles the Shopping Cart (Add/Remove items).</li>
+                    <li>Manages "Dark Mode".</li>
+                    <li>Handles filtering and search.</li>
+                    <li>Shows popups (Modals) for menus and checkout.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: Data Source -->
+        <div class="slide">
+            <h2>The Data Source</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> We are simulating a database using a JavaScript Array.
+            </div>
+            <ul>
+                <li><strong>Variable:</strong> <code>const restaurantsData</code></li>
+                <li><strong>Structure:</strong> A list (Array) of Objects.</li>
+                <li><strong>What's inside?</strong>
+                    <ul>
+                        <li>Restaurant details (Name, Rating, Image).</li>
+                        <li><strong>Nested Menu:</strong> Another list inside each restaurant containing specific food
+                            items.</li>
+                    </ul>
+                </li>
+            </ul>
+            <pre><code><span class="comment">// Simplified Example</span>
+<span class="keyword">const</span> restaurantsData = [
+  {
+     name: <span class="string">"Pizza Paradise"</span>,
+     menu: [ { name: <span class="string">"Margherita"</span>, price: 299 } ]
+  }
+];</code></pre>
+        </div>
+
+        <!-- Slide 4: Rendering -->
+        <div class="slide">
+            <h2>Rendering the UI</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> Taking raw data and turning it into visible HTML.
+            </div>
+            <h3>Function: <code>renderRestaurants()</code></h3>
+            <p><strong>How it works:</strong></p>
+            <ol style="margin-left: 20px; font-size: 1.1rem; color: #ccc; line-height: 1.8;">
+                <li>It looks at the <code>restaurantsData</code> array.</li>
+                <li>It uses <code>.map()</code> to loop through every restaurant.</li>
+                <li>It creates a string of HTML (divs, images, text) for each one.</li>
+                <li>It injects this HTML into the page using <code>.innerHTML</code>.</li>
+            </ol>
+            <p style="margin-top: 20px; color: var(--secondary-accent);"><strong>Result:</strong> You see a grid of
+                restaurant cards without writing HTML for each one manually.</p>
+        </div>
+
+        <!-- Slide 5: Cart Logic -->
+        <div class="slide">
+            <h2>Shopping Cart Logic</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> Tracking what the user wants to buy.
+            </div>
+            <p><strong>State:</strong> <code>let cart = []</code> (Starts as an empty list).</p>
+            <h3>Key Functions:</h3>
+            <ul>
+                <li><code>addToCart(id)</code>: Checks if item exists. If yes, quantity +1. If no, add to array.</li>
+                <li><code>removeFromCart(id)</code>: Deletes the item from the array.</li>
+                <li><code>updateCart()</code>: <strong>Crucial Function.</strong> It recalculates the Total Price and
+                    updates the HTML in the sidebar.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 6: Interaction -->
+        <div class="slide">
+            <h2>User Interaction</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> Helping the user find what they want quickly.
+            </div>
+            <h3>Filter Chips</h3>
+            <p>When you click "Fast Delivery" or "Top Rated", the code runs <code>.filter()</code> on the data array to
+                show only matching restaurants.</p>
+            <h3>Search Bar Logic</h3>
+            <ul>
+                <li>Listens for the <code>click</code> or <code>Enter</code> key.</li>
+                <li>Converts text to <strong>lowercase</strong> (to match easily).</li>
+                <li>Checks if the <em>Restaurant Name</em> OR <em>Cuisine</em> matches your text.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 7: Modals -->
+        <div class="slide">
+            <h2>Modals (Popups)</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> Showing content without leaving the page.
+            </div>
+            <h3>Types of Modals:</h3>
+            <ul>
+                <li><strong>Menu Modal:</strong> Shows food items when clicking a restaurant.</li>
+                <li><strong>Auth Modal:</strong> Login/Signup forms.</li>
+                <li><strong>Order Summary:</strong> The receipt shown after checkout.</li>
+            </ul>
+            <h3 style="margin-top: 20px;">Logic: CSS Classes</h3>
+            <p>The code simply adds or removes a CSS class called <code>.active</code>.</p>
+            <p
+                style="text-align: center; margin-top: 10px; font-family: monospace; background: #333; padding: 10px; border-radius: 5px;">
+                .active class = Popup Visible <br> No class = Popup Hidden
+            </p>
+        </div>
+
+        <!-- Slide 8: Dark Mode -->
+        <div class="slide">
+            <h2>Dark Mode</h2>
+            <div class="concept-box">
+                <strong>Concept:</strong> Remembering user preferences.
+            </div>
+            <h3>Storage</h3>
+            <p>We use <code>localStorage</code>. This saves the user's choice inside their browser so it remembers them
+                next time.</p>
+            <h3>Logic Flow:</h3>
+            <ol style="margin-left: 20px; font-size: 1.1rem; color: #ccc; line-height: 1.8;">
+                <li>When page loads, check if <code>darkMode</code> is "true".</li>
+                <li>If yes, add the <code>.dark-mode</code> class to the <code>&lt;body&gt;</code>.</li>
+                <li>Switch the icon from Sun to Moon.</li>
+            </ol>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+        </div>
+        <div class="slide-number" id="slideNum">1 / 8</div>
+        <div class="progress-bar" id="progress"></div>
+
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideNum = document.getElementById('slideNum');
+        const progressBar = document.getElementById('progress');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            // Handle Bounds
+            if (index < 0) index = 0;
+            if (index >= slides.length) index = slides.length - 1;
+            currentSlide = index;
+
+            // Update UI
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i === currentSlide) {
+                    slide.classList.add('active');
+                } else if (i < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            // Update Counter & Progress
+            slideNum.textContent = `${currentSlide + 1} / ${slides.length}`;
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+        }
+
+        // Event Listeners
+        prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft') {
+                showSlide(currentSlide - 1);
+            }
+        });
+
+        // Initial Load
+        showSlide(0);
+    </script>
+
+</body>
+
+</html>
